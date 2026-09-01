@@ -7,6 +7,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { RECOVERY_QUEUE } from './recovery.queue';
 import { RecoveryProcessor } from './recovery.processor';
 import { RecoveryActionService } from './recovery-action.service';
+import { RecoveryAnalyticsService } from './recovery-analytics.service';
+import { RecoveryAnalyticsController } from './recovery-analytics.controller';
 
 @Module({
     imports: [
@@ -15,11 +17,13 @@ import { RecoveryActionService } from './recovery-action.service';
             name: RECOVERY_QUEUE,
         }),
     ],
+    controllers: [RecoveryAnalyticsController],
     providers: [
         RecoveryService,
         RecoveryDecisionService,
         RecoveryProcessor,
         RecoveryActionService,
+        RecoveryAnalyticsService,
     ],
     exports: [RecoveryService, RecoveryDecisionService],
 })
