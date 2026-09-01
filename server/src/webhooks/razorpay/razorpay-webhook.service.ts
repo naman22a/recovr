@@ -4,13 +4,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { WebhookEvent } from '../../models/webhook-event.model';
 import { Payment } from '../../models/payment.model';
 import { RecoveryService } from '../../recovery/recovery.service';
-import { RecoveryStrategy } from '../../models/recovery-attempt.model';
+import { RecoveryDecisionService } from '../../recovery/recovery-decision.service';
 
 @Injectable()
 export class RazorpayWebhookService {
     constructor(
         private readonly em: EntityManager,
         private readonly recoveryService: RecoveryService,
+        private readonly recoveryDecisionService: RecoveryDecisionService,
     ) {}
 
     async handle(eventId: string, payload: RazorpayWebhookPayload) {
@@ -52,10 +53,16 @@ export class RazorpayWebhookService {
 
         await this.em.flush();
 
+        const decision = this.recoveryDecisionService.decide(
+            payment.error_code!,
+        );
+
+        console.log('Recovery decision:', decision);
+
         await this.recoveryService.createAttempt(
             paymentEntity,
-            RecoveryStrategy.CUSTOMER_RETRY,
-            'Payment failed and requires customer retry',
+            decision.strategy,
+            decision.reason,
         );
 
         console.log(`Processed payment.failed: ${payment.id}`);
