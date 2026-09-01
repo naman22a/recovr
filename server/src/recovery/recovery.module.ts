@@ -9,6 +9,8 @@ import { RecoveryProcessor } from './recovery.processor';
 import { RecoveryActionService } from './recovery-action.service';
 import { RecoveryAnalyticsService } from './recovery-analytics.service';
 import { RecoveryAnalyticsController } from './recovery-analytics.controller';
+import { RecoverySimulatorController } from './recovery-simulator.controller';
+import { RecoverySimulatorService } from './recovery-simulator.service';
 
 @Module({
     imports: [
@@ -17,13 +19,14 @@ import { RecoveryAnalyticsController } from './recovery-analytics.controller';
             name: RECOVERY_QUEUE,
         }),
     ],
-    controllers: [RecoveryAnalyticsController],
+    controllers: [RecoveryAnalyticsController, RecoverySimulatorController],
     providers: [
         RecoveryService,
         RecoveryDecisionService,
         RecoveryProcessor,
         RecoveryActionService,
         RecoveryAnalyticsService,
+        RecoverySimulatorService,
     ],
     exports: [RecoveryService, RecoveryDecisionService],
 })
