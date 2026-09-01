@@ -6,10 +6,16 @@ import {
     RecoveryStrategy,
 } from '../models/recovery-attempt.model';
 import { Payment } from '../models/payment.model';
+import { Queue } from 'bullmq';
+import { RECOVERY_QUEUE } from './recovery.queue';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Injectable()
 export class RecoveryService {
-    constructor(private readonly em: EntityManager) {}
+    constructor(
+        private readonly em: EntityManager,
+        @InjectQueue(RECOVERY_QUEUE) private readonly recoveryQueue: Queue,
+    ) {}
 
     async createAttempt(
         payment: Payment,
@@ -26,6 +32,22 @@ export class RecoveryService {
         this.em.persist(attempt);
 
         await this.em.flush();
+
+        await this.recoveryQueue.add(
+            'process-recovery',
+            {
+                recoveryAttemptId: attempt.id,
+            },
+            {
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 5000,
+                },
+                removeOnComplete: 100,
+                removeOnFail: 100,
+            },
+        );
 
         return attempt;
     }
