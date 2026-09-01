@@ -9,10 +9,14 @@ import {
 import type { Request } from 'express';
 import type { RazorpayWebhookPayload } from './interfaces/razorpay-webhook-payload.interface';
 import { RazorpaySignatureService } from './razorpay-signature.service';
+import { RazorpayWebhookService } from './razorpay-webhook.service';
 
 @Controller('webhooks')
 export class RazorpayWebhookController {
-    constructor(private readonly signatureService: RazorpaySignatureService) {}
+    constructor(
+        private readonly signatureService: RazorpaySignatureService,
+        private readonly webhookService: RazorpayWebhookService,
+    ) {}
 
     @Post('razorpay')
     async razorpayWebhook(
@@ -22,6 +26,10 @@ export class RazorpayWebhookController {
     ) {
         if (!signature) {
             throw new BadRequestException('Missing Razorpay signature');
+        }
+
+        if (!eventId) {
+            throw new BadRequestException('Missing Razorpay event ID');
         }
 
         if (!request.rawBody) {
@@ -36,27 +44,7 @@ export class RazorpayWebhookController {
 
         const payload = request.body as RazorpayWebhookPayload;
 
-        console.log('Razorpay event:', payload.event);
-
-        console.log('Event ID:', eventId);
-        console.log('Event:', request.body.event);
-
-        if (request.body.event !== 'payment.failed') {
-            return {
-                received: true,
-            };
-        }
-
-        const payment = payload.payload.payment.entity;
-
-        console.log({
-            paymentId: payment.id,
-            amount: payment.amount,
-            status: payment.status,
-            method: payment.method,
-            errorCode: payment.error_code,
-            errorDescription: payment.error_description,
-        });
+        await this.webhookService.handle(eventId, payload);
 
         return {
             received: true,
