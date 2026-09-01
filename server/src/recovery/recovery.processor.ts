@@ -7,6 +7,7 @@ import {
     RecoveryAttemptStatus,
 } from '../models/recovery-attempt.model';
 import { RECOVERY_QUEUE } from './recovery.queue';
+import { RecoveryActionService } from './recovery-action.service';
 
 interface RecoveryJob {
     recoveryAttemptId: number;
@@ -15,7 +16,10 @@ interface RecoveryJob {
 @Processor(RECOVERY_QUEUE)
 @Injectable()
 export class RecoveryProcessor extends WorkerHost {
-    constructor(private readonly em: EntityManager) {
+    constructor(
+        private readonly em: EntityManager,
+        private readonly recoveryActionService: RecoveryActionService,
+    ) {
         super();
     }
 
@@ -62,13 +66,14 @@ export class RecoveryProcessor extends WorkerHost {
                 reason: attempt.reason,
             });
 
-            // Temporary simulation.
-            // Actual recovery action.
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const result = await this.recoveryActionService.execute(
+                attempt.strategy,
+                attempt.payment,
+            );
 
             attempt.status = RecoveryAttemptStatus.COMPLETED;
 
-            attempt.result = 'Recovery action simulated successfully';
+            attempt.result = result;
 
             attempt.completedAt = new Date();
 

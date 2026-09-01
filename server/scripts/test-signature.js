@@ -11,7 +11,7 @@ const body = JSON.stringify({
     payload: {
         payment: {
             entity: {
-                id: 'pay_test7898',
+                id: 'pay_test7896',
                 entity: 'payment',
                 amount: 500000,
                 currency: 'INR',
@@ -21,7 +21,7 @@ const body = JSON.stringify({
                 description: 'Test payment',
                 email: 'test@example.com',
                 contact: '+919999999999',
-                error_code: 'GATEWAY_ERROR',
+                error_code: 'BAD_REQUEST_ERROR',
                 error_description: 'Payment failed for testing',
                 error_source: 'bank',
                 error_step: 'payment_authorization',
