@@ -1,4 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection, OneToMany } from '@mikro-orm/core';
+import { RecoveryAttempt } from './recovery-attempt.model';
 
 @Entity()
 export class Payment {
@@ -25,4 +27,10 @@ export class Payment {
 
     @Property({ nullable: true })
     errorDescription?: string;
+
+    @OneToMany(
+        () => RecoveryAttempt,
+        (recoveryAttempt) => recoveryAttempt.payment,
+    )
+    recoveryAttempts = new Collection<RecoveryAttempt>(this);
 }

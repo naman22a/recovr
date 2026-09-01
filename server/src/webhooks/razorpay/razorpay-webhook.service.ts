@@ -3,10 +3,15 @@ import type { RazorpayWebhookPayload } from './interfaces/razorpay-webhook-paylo
 import { EntityManager } from '@mikro-orm/postgresql';
 import { WebhookEvent } from '../../models/webhook-event.model';
 import { Payment } from '../../models/payment.model';
+import { RecoveryService } from '../../recovery/recovery.service';
+import { RecoveryStrategy } from '../../models/recovery-attempt.model';
 
 @Injectable()
 export class RazorpayWebhookService {
-    constructor(private readonly em: EntityManager) {}
+    constructor(
+        private readonly em: EntityManager,
+        private readonly recoveryService: RecoveryService,
+    ) {}
 
     async handle(eventId: string, payload: RazorpayWebhookPayload) {
         // Ignore events that we don't currently handle
@@ -46,6 +51,12 @@ export class RazorpayWebhookService {
         this.em.persist(paymentEntity);
 
         await this.em.flush();
+
+        await this.recoveryService.createAttempt(
+            paymentEntity,
+            RecoveryStrategy.CUSTOMER_RETRY,
+            'Payment failed and requires customer retry',
+        );
 
         console.log(`Processed payment.failed: ${payment.id}`);
     }
