@@ -2,12 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { RecoveryStrategy } from '../models/recovery-attempt.model';
 import { Payment } from '../models/payment.model';
 
+export type RecoveryOutcome =
+    'recovered' | 'waiting_for_customer' | 'failed' | 'manual_review';
+
+export interface RecoveryResult {
+    outcome: RecoveryOutcome;
+    message: string;
+    amountRecovered: number;
+}
+
 @Injectable()
 export class RecoveryActionService {
     async execute(
         strategy: RecoveryStrategy,
         payment: Payment,
-    ): Promise<string> {
+    ): Promise<RecoveryResult> {
         switch (strategy) {
             case RecoveryStrategy.RETRY_PAYMENT:
                 return this.retryPayment(payment);
@@ -23,27 +32,51 @@ export class RecoveryActionService {
         }
     }
 
-    private async retryPayment(payment: Payment): Promise<string> {
+    private async retryPayment(payment: Payment): Promise<RecoveryResult> {
         console.log(`Retrying payment ${payment.razorpayPaymentId}`);
 
-        // Simulation for now.
-        // Later this will call the appropriate
-        // Razorpay test-mode recovery flow.
+        const success = Math.random() > 0.4;
 
-        return 'Payment retry simulated';
+        if (success) {
+            return {
+                outcome: 'recovered',
+                message: 'Payment retry succeeded',
+                amountRecovered: payment.amount,
+            };
+        }
+
+        return {
+            outcome: 'failed',
+            message: 'Payment retry failed',
+            amountRecovered: 0,
+        };
     }
 
-    private async requestCustomerRetry(payment: Payment): Promise<string> {
+    private async requestCustomerRetry(
+        payment: Payment,
+    ): Promise<RecoveryResult> {
         console.log(
             `Requesting customer retry for ${payment.razorpayPaymentId}`,
         );
 
-        return 'Customer retry requested';
+        // Simulates sending a payment retry link/message.
+
+        return {
+            outcome: 'waiting_for_customer',
+            message: 'Customer retry request sent',
+            amountRecovered: 0,
+        };
     }
 
-    private async createManualReview(payment: Payment): Promise<string> {
+    private async createManualReview(
+        payment: Payment,
+    ): Promise<RecoveryResult> {
         console.log(`Creating manual review for ${payment.razorpayPaymentId}`);
 
-        return 'Manual review created';
+        return {
+            outcome: 'manual_review',
+            message: 'Manual review created',
+            amountRecovered: 0,
+        };
     }
 }

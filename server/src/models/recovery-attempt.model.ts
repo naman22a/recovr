@@ -7,6 +7,7 @@ export enum RecoveryAttemptStatus {
     COMPLETED = 'completed',
     FAILED = 'failed',
     STOPPED = 'stopped',
+    WAITING_FOR_CUSTOMER = 'waiting_for_customer',
 }
 
 export enum RecoveryStrategy {
@@ -34,6 +35,18 @@ export class RecoveryAttempt {
 
     @Property({ nullable: true })
     result?: string;
+
+    @Property({ nullable: true })
+    amountRecovered?: number;
+
+    @Property({ nullable: true })
+    failureReason?: string;
+
+    @Property()
+    attemptNumber: number = 1;
+
+    @Property()
+    maxAttempts: number = 3;
 
     @Property()
     createdAt: Date = new Date();

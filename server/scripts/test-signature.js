@@ -11,7 +11,7 @@ const body = JSON.stringify({
     payload: {
         payment: {
             entity: {
-                id: 'pay_test7896',
+                id: 'pay_test1001',
                 entity: 'payment',
                 amount: 500000,
                 currency: 'INR',

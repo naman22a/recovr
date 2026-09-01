@@ -71,15 +71,71 @@ export class RecoveryProcessor extends WorkerHost {
                 attempt.payment,
             );
 
-            attempt.status = RecoveryAttemptStatus.COMPLETED;
+            if (result.outcome === 'recovered') {
+                attempt.status = RecoveryAttemptStatus.COMPLETED;
 
-            attempt.result = result;
+                attempt.result = result.message;
+                attempt.amountRecovered = result.amountRecovered;
+                attempt.completedAt = new Date();
 
-            attempt.completedAt = new Date();
+                await em.flush();
+
+                console.log(
+                    `Recovery succeeded: ₹${result.amountRecovered / 100}`,
+                );
+
+                return;
+            }
+
+            if (result.outcome === 'waiting_for_customer') {
+                attempt.status = RecoveryAttemptStatus.WAITING_FOR_CUSTOMER;
+
+                attempt.result = result.message;
+
+                await em.flush();
+
+                console.log(
+                    `Recovery attempt ${attempt.id} is waiting for customer`,
+                );
+
+                return;
+            }
+
+            if (result.outcome === 'manual_review') {
+                attempt.status = RecoveryAttemptStatus.STOPPED;
+
+                attempt.result = result.message;
+
+                await em.flush();
+
+                console.log(
+                    `Recovery attempt ${attempt.id} escalated to manual review`,
+                );
+
+                return;
+            }
+
+            attempt.failureReason = result.message;
+
+            if (attempt.attemptNumber >= attempt.maxAttempts) {
+                attempt.status = RecoveryAttemptStatus.STOPPED;
+
+                attempt.result = 'Maximum recovery attempts reached';
+
+                await em.flush();
+
+                console.log(
+                    `Recovery stopped after ${attempt.attemptNumber} attempts`,
+                );
+
+                return;
+            }
+
+            attempt.status = RecoveryAttemptStatus.FAILED;
 
             await em.flush();
 
-            console.log(`Recovery attempt ${recoveryAttemptId} completed`);
+            throw new Error(result.message);
         } catch (error) {
             console.error('Recovery processor failed:', error);
             throw error;
