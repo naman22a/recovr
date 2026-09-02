@@ -35,7 +35,7 @@ export class RecoveryActionService {
     private async retryPayment(payment: Payment): Promise<RecoveryResult> {
         console.log(`Retrying payment ${payment.razorpayPaymentId}`);
 
-        const success = Math.random() > 0.4;
+        const success = payment.errorCode === 'GATEWAY_ERROR';
 
         if (success) {
             return {
