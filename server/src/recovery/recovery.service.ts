@@ -22,12 +22,18 @@ export class RecoveryService {
         strategy: RecoveryStrategy,
         reason: string,
     ): Promise<RecoveryAttempt> {
+        const previousAttempts = await this.em.find(RecoveryAttempt, {
+            payment: payment,
+        });
+        const attemptNumber = previousAttempts.length + 1;
+
         const attempt = new RecoveryAttempt();
 
         attempt.payment = payment;
         attempt.strategy = strategy;
         attempt.reason = reason;
         attempt.status = RecoveryAttemptStatus.PENDING;
+        attempt.attemptNumber = attemptNumber;
 
         this.em.persist(attempt);
 

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Payment } from '../models/payment.model';
-import { RecoveryDecisionService } from './recovery-decision.service';
 import { RecoveryService } from './recovery.service';
 import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 
@@ -9,7 +8,6 @@ import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 export class RecoverySimulatorService {
     constructor(
         private readonly em: EntityManager,
-        private readonly decisionService: RecoveryDecisionService,
         private readonly recoveryService: RecoveryService,
         private readonly aiDecisionService: AIRecoveryDecisionService,
     ) {}
