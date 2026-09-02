@@ -11,6 +11,7 @@ export interface RecoveryContext {
     errorDescription?: string;
     attemptNumber: number;
     maxAttempts: number;
+    previousAttempts: number;
 }
 
 export interface AIRecoveryDecision {
@@ -69,6 +70,7 @@ Payment:
 - Error description: ${context.errorDescription ?? 'unknown'}
 - Current attempt: ${context.attemptNumber}
 - Maximum attempts: ${context.maxAttempts}
+- Previous recovery attempts: ${context.previousAttempts}
 
 Allowed strategies:
 - retry_payment

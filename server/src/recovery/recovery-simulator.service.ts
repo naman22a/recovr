@@ -4,6 +4,7 @@ import { Payment } from '../models/payment.model';
 import { RecoveryService } from './recovery.service';
 import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 import { RecoveryOrchestratorService } from './recovery-orchestrator.service';
+import { RecoveryAttempt } from '../models/recovery-attempt.model';
 
 @Injectable()
 export class RecoverySimulatorService {
@@ -42,6 +43,10 @@ export class RecoverySimulatorService {
         await em.persistAndFlush(payments);
 
         for (const payment of payments) {
+            const previousAttempts = await em.find(RecoveryAttempt, {
+                payment,
+            });
+
             const decision = await this.aiDecisionService.decide({
                 paymentId: payment.id,
                 amount: payment.amount,
@@ -51,6 +56,7 @@ export class RecoverySimulatorService {
                 errorDescription: payment.errorDescription,
                 attemptNumber: 1,
                 maxAttempts: 3,
+                previousAttempts: previousAttempts.length,
             });
 
             console.log('AI Recovery Decision:', decision);

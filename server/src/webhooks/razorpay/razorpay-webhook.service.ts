@@ -5,6 +5,7 @@ import { WebhookEvent } from '../../models/webhook-event.model';
 import { Payment } from '../../models/payment.model';
 import { RecoveryService } from '../../recovery/recovery.service';
 import { AIRecoveryDecisionService } from '../../recovery/ai/ai-recovery-decision.service';
+import { RecoveryAttempt } from '../../models/recovery-attempt.model';
 
 @Injectable()
 export class RazorpayWebhookService {
@@ -55,6 +56,10 @@ export class RazorpayWebhookService {
 
         await em.flush();
 
+        const previousAttempts = await em.find(RecoveryAttempt, {
+            payment: paymentEntity,
+        });
+
         const decision = await this.aiDecisionService.decide({
             paymentId: paymentEntity.id,
             amount: paymentEntity.amount,
@@ -64,6 +69,7 @@ export class RazorpayWebhookService {
             errorDescription: paymentEntity.errorDescription,
             attemptNumber: 1,
             maxAttempts: 3,
+            previousAttempts: previousAttempts.length,
         });
 
         console.log('AI Recovery Decision:', decision);

@@ -37,6 +37,10 @@ export class RecoveryOrchestratorService {
 
         const payment = attempt.payment;
 
+        const previousAttempts = await em.find(RecoveryAttempt, {
+            payment,
+        });
+
         const decision = await this.aiDecisionService.decide({
             paymentId: payment.id,
             amount: payment.amount,
@@ -46,6 +50,7 @@ export class RecoveryOrchestratorService {
             errorDescription: payment.errorDescription,
             attemptNumber: attempt.attemptNumber + 1,
             maxAttempts: attempt.maxAttempts,
+            previousAttempts: previousAttempts.length,
         });
 
         console.log('Next AI Recovery Decision:', decision);
