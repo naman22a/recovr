@@ -25,6 +25,8 @@ export class AIRecoveryDecisionService {
     private readonly model = new ChatOllama({
         model: 'gemma4:12b',
         temperature: 0,
+        numPredict: 256,
+        think: false,
     });
 
     async decide(context: RecoveryContext): Promise<AIRecoveryDecision> {
@@ -86,9 +88,14 @@ Return ONLY valid JSON in this exact format:
 
 Rules:
 - confidence must be between 0 and 1
-- never recommend a strategy outside the allowed strategies
-- consider the payment failure information and attempt limits
-- explain the reason for your recommendation
+- use only the allowed strategies
+- use retry_payment for transient failures such as gateway errors
+- use customer_retry when customer action may be required
+- use manual_review when repeated attempts have failed or the case is unsafe to automate
+- do not recommend retry_payment when the maximum attempt limit has been reached
+- keep the reason to one short sentence
+- do not explain your reasoning
+- return the JSON immediately
 `;
     }
 
@@ -127,9 +134,11 @@ Rules:
             throw new Error('AI returned an invalid reason');
         }
 
+        const confidence = Math.min(value.confidence, 0.95);
+
         return {
             strategy: value.strategy as RecoveryStrategy,
-            confidence: value.confidence,
+            confidence,
             reason: value.reason,
         };
     }
