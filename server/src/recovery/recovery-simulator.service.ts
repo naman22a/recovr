@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Payment } from '../models/payment.model';
 import { RecoveryService } from './recovery.service';
 import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
+import { RecoveryOrchestratorService } from './recovery-orchestrator.service';
 
 @Injectable()
 export class RecoverySimulatorService {
@@ -10,6 +11,7 @@ export class RecoverySimulatorService {
         private readonly em: EntityManager,
         private readonly recoveryService: RecoveryService,
         private readonly aiDecisionService: AIRecoveryDecisionService,
+        private readonly recoveryOrchestrator: RecoveryOrchestratorService,
     ) {}
 
     async simulate(count = 50) {
@@ -52,6 +54,13 @@ export class RecoverySimulatorService {
             });
 
             console.log('AI Recovery Decision:', decision);
+
+            if (!this.recoveryOrchestrator.isDecisionSafe(decision)) {
+                console.log(
+                    `Recovery stopped for payment ${payment.id}: AI decision failed safety validation`,
+                );
+                continue;
+            }
 
             await this.recoveryService.createAttempt(
                 payment,

@@ -70,7 +70,7 @@ export class RecoveryOrchestratorService {
         );
     }
 
-    private isDecisionSafe(decision: AIRecoveryDecision): boolean {
+    isDecisionSafe(decision: AIRecoveryDecision): boolean {
         if (!Object.values(RecoveryStrategy).includes(decision.strategy)) {
             return false;
         }
