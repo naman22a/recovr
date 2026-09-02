@@ -4,7 +4,10 @@ import {
     RecoveryAttempt,
     RecoveryAttemptStatus,
 } from '../models/recovery-attempt.model';
-import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
+import {
+    AIRecoveryDecision,
+    AIRecoveryDecisionService,
+} from './ai/ai-recovery-decision.service';
 import { RecoveryService } from './recovery.service';
 import { RecoveryStrategy } from '../common/enums';
 
@@ -47,27 +50,13 @@ export class RecoveryOrchestratorService {
 
         console.log('Next AI Recovery Decision:', decision);
 
-        if (!Object.values(RecoveryStrategy).includes(decision.strategy)) {
+        if (!this.isDecisionSafe(decision)) {
             attempt.status = RecoveryAttemptStatus.STOPPED;
-            attempt.result = 'AI returned an unsupported recovery strategy';
-
+            attempt.result = 'AI decision failed safety validation';
             await em.flush();
 
             console.log(
-                `Recovery stopped because AI returned unsupported strategy: ${decision.strategy}`,
-            );
-
-            return;
-        }
-
-        if (decision.confidence < 0.5) {
-            attempt.status = RecoveryAttemptStatus.STOPPED;
-            attempt.result = 'AI confidence too low for automatic recovery';
-
-            await em.flush();
-
-            console.log(
-                `Recovery stopped because AI confidence was ${decision.confidence}`,
+                `Recovery stopped because AI decision failed safety validation`,
             );
 
             return;
@@ -79,5 +68,17 @@ export class RecoveryOrchestratorService {
             decision.reason,
             em,
         );
+    }
+
+    private isDecisionSafe(decision: AIRecoveryDecision): boolean {
+        if (!Object.values(RecoveryStrategy).includes(decision.strategy)) {
+            return false;
+        }
+
+        if (decision.confidence < 0.5) {
+            return false;
+        }
+
+        return true;
     }
 }

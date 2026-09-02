@@ -37,6 +37,10 @@ export class AIRecoveryDecisionService {
             response = await this.model.invoke(prompt);
         }
 
+        if (!response.content) {
+            throw new Error('AI returned an empty response after retry');
+        }
+
         console.log('Raw AI response:', response.content);
 
         const rawContent = response.content.toString();
