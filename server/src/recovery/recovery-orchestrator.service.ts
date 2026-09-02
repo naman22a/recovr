@@ -6,6 +6,7 @@ import {
 } from '../models/recovery-attempt.model';
 import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 import { RecoveryService } from './recovery.service';
+import { RecoveryStrategy } from '../common/enums';
 
 @Injectable()
 export class RecoveryOrchestratorService {
@@ -45,6 +46,32 @@ export class RecoveryOrchestratorService {
         });
 
         console.log('Next AI Recovery Decision:', decision);
+
+        if (!Object.values(RecoveryStrategy).includes(decision.strategy)) {
+            attempt.status = RecoveryAttemptStatus.STOPPED;
+            attempt.result = 'AI returned an unsupported recovery strategy';
+
+            await em.flush();
+
+            console.log(
+                `Recovery stopped because AI returned unsupported strategy: ${decision.strategy}`,
+            );
+
+            return;
+        }
+
+        if (decision.confidence < 0.5) {
+            attempt.status = RecoveryAttemptStatus.STOPPED;
+            attempt.result = 'AI confidence too low for automatic recovery';
+
+            await em.flush();
+
+            console.log(
+                `Recovery stopped because AI confidence was ${decision.confidence}`,
+            );
+
+            return;
+        }
 
         await this.recoveryService.createAttempt(
             payment,

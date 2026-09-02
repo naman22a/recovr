@@ -25,7 +25,7 @@ export class AIRecoveryDecisionService {
             case 'GATEWAY_ERROR':
                 return {
                     strategy: RecoveryStrategy.RETRY_PAYMENT,
-                    confidence: 0.92,
+                    confidence: 0.4,
                     reason: 'Temporary gateway failure suggests that retrying the payment may recover it.',
                 };
 
@@ -39,7 +39,7 @@ export class AIRecoveryDecisionService {
             default:
                 return {
                     strategy: RecoveryStrategy.MANUAL_REVIEW,
-                    confidence: 0.6,
+                    confidence: 0.4,
                     reason: 'The payment failure is not recognized as safely recoverable automatically, so manual review is required.',
                 };
         }
