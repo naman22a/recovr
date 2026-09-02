@@ -135,4 +135,52 @@ export class RecoveryAnalyticsService {
             completedAt: attempt.completedAt,
         }));
     }
+
+    async getPaymentRecovery(paymentId: number) {
+        const payment = await this.em.findOneOrFail(Payment, paymentId);
+
+        const attempts = await this.em.find(
+            RecoveryAttempt,
+            {
+                payment: payment.id,
+            },
+            {
+                orderBy: {
+                    attemptNumber: 'ASC',
+                },
+            },
+        );
+
+        return {
+            payment: {
+                id: payment.id,
+                razorpayPaymentId: payment.razorpayPaymentId,
+                amount: payment.amount,
+                currency: payment.currency,
+                status: payment.status,
+                method: payment.method,
+                errorCode: payment.errorCode,
+                errorDescription: payment.errorDescription,
+            },
+
+            recoveryAttempts: attempts.map((attempt) => ({
+                id: attempt.id,
+                attemptNumber: attempt.attemptNumber,
+                maxAttempts: attempt.maxAttempts,
+
+                strategy: attempt.strategy,
+                confidence: attempt.confidence,
+                decisionSource: attempt.decisionSource,
+                reason: attempt.reason,
+
+                status: attempt.status,
+                result: attempt.result,
+                failureReason: attempt.failureReason,
+                amountRecovered: attempt.amountRecovered ?? 0,
+
+                createdAt: attempt.createdAt,
+                completedAt: attempt.completedAt,
+            })),
+        };
+    }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { RecoveryAnalyticsService } from './recovery-analytics.service';
 
 @Controller('recovery')
@@ -13,5 +13,12 @@ export class RecoveryAnalyticsController {
     @Get('history')
     async getHistory() {
         return this.analyticsService.getHistory();
+    }
+
+    @Get('payments/:paymentId')
+    async getPaymentRecovery(
+        @Param('paymentId', ParseIntPipe) paymentId: number,
+    ) {
+        return this.analyticsService.getPaymentRecovery(paymentId);
     }
 }
