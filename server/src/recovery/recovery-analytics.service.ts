@@ -62,13 +62,25 @@ export class RecoveryAnalyticsService {
                 attempt.status === RecoveryAttemptStatus.WAITING_FOR_CUSTOMER,
         ).length;
 
-        const failedRecoveries = attempts.filter(
-            (attempt) => attempt.status === RecoveryAttemptStatus.FAILED,
-        ).length;
+        const failedRecoveries = new Set(
+            attempts
+                .filter(
+                    (attempt) =>
+                        attempt.status === RecoveryAttemptStatus.FAILED,
+                )
+                .map((attempt) => attempt.payment.id),
+        ).size;
 
-        const stoppedRecoveries = attempts.filter(
-            (attempt) => attempt.status === RecoveryAttemptStatus.STOPPED,
-        ).length;
+        const stoppedPaymentIds = new Set(
+            attempts
+                .filter(
+                    (attempt) =>
+                        attempt.status === RecoveryAttemptStatus.STOPPED,
+                )
+                .map((attempt) => attempt.payment.id),
+        );
+
+        const stoppedRecoveries = stoppedPaymentIds.size;
 
         const recoveryRate =
             payments.length === 0
@@ -77,21 +89,13 @@ export class RecoveryAnalyticsService {
 
         return {
             paymentsAtRisk: atRiskPayments.length,
-
             totalAmountAtRisk,
-
             totalRecoveryAttempts: attempts.length,
-
             successfulRecoveries,
-
             amountRecovered,
-
             recoveryRate: Number(recoveryRate.toFixed(2)),
-
             waitingForCustomer,
-
             failedRecoveries,
-
             stoppedRecoveries,
         };
     }
