@@ -20,6 +20,7 @@ export class RecoveryService {
         payment: Payment,
         strategy: RecoveryStrategy,
         reason: string,
+        confidence: number,
         em: EntityManager,
     ): Promise<RecoveryAttempt> {
         const previousAttempts = await em.find(RecoveryAttempt, {
@@ -32,6 +33,7 @@ export class RecoveryService {
         attempt.payment = payment;
         attempt.strategy = strategy;
         attempt.reason = reason;
+        attempt.confidence = confidence;
         attempt.status = RecoveryAttemptStatus.PENDING;
         attempt.attemptNumber = attemptNumber;
 

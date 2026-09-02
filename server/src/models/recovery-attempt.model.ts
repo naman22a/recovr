@@ -34,6 +34,9 @@ export class RecoveryAttempt {
     reason?: string;
 
     @Property({ nullable: true })
+    confidence?: number;
+
+    @Property({ nullable: true })
     result?: string;
 
     @Property({ nullable: true })

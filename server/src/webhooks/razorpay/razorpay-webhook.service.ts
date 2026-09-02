@@ -4,14 +4,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { WebhookEvent } from '../../models/webhook-event.model';
 import { Payment } from '../../models/payment.model';
 import { RecoveryService } from '../../recovery/recovery.service';
-import { RecoveryDecisionService } from '../../recovery/recovery-decision.service';
+import { AIRecoveryDecisionService } from '../../recovery/ai/ai-recovery-decision.service';
 
 @Injectable()
 export class RazorpayWebhookService {
     constructor(
         private readonly em: EntityManager,
         private readonly recoveryService: RecoveryService,
-        private readonly recoveryDecisionService: RecoveryDecisionService,
+        private readonly aiDecisionService: AIRecoveryDecisionService,
     ) {}
 
     async handle(eventId: string, payload: RazorpayWebhookPayload) {
@@ -55,16 +55,24 @@ export class RazorpayWebhookService {
 
         await em.flush();
 
-        const decision = this.recoveryDecisionService.decide(
-            payment.error_code!,
-        );
+        const decision = await this.aiDecisionService.decide({
+            paymentId: paymentEntity.id,
+            amount: paymentEntity.amount,
+            currency: paymentEntity.currency,
+            method: paymentEntity.method!,
+            errorCode: paymentEntity.errorCode,
+            errorDescription: paymentEntity.errorDescription,
+            attemptNumber: 1,
+            maxAttempts: 3,
+        });
 
-        console.log('Recovery decision:', decision);
+        console.log('AI Recovery Decision:', decision);
 
         await this.recoveryService.createAttempt(
             paymentEntity,
             decision.strategy,
             decision.reason,
+            decision.confidence,
             em,
         );
 

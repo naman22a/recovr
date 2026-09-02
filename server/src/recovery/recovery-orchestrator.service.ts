@@ -66,6 +66,7 @@ export class RecoveryOrchestratorService {
             payment,
             decision.strategy,
             decision.reason,
+            decision.confidence,
             em,
         );
     }

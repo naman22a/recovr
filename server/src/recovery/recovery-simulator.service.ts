@@ -66,6 +66,7 @@ export class RecoverySimulatorService {
                 payment,
                 decision.strategy,
                 decision.reason,
+                decision.confidence,
                 em,
             );
         }
