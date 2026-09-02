@@ -30,6 +30,6 @@ import { RecoveryOrchestratorService } from './recovery-orchestrator.service';
         AIRecoveryDecisionService,
         RecoveryOrchestratorService,
     ],
-    exports: [RecoveryService],
+    exports: [RecoveryService, AIRecoveryDecisionService],
 })
 export class RecoveryModule {}

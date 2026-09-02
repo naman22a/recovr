@@ -16,6 +16,10 @@ export enum RecoveryStrategy {
     MANUAL_REVIEW = 'manual_review',
 }
 
+export enum RecoveryDecisionSource {
+    AI = 'ai',
+}
+
 @Entity()
 export class RecoveryAttempt {
     @PrimaryKey()
@@ -35,6 +39,9 @@ export class RecoveryAttempt {
 
     @Property({ nullable: true })
     confidence?: number;
+
+    @Enum(() => RecoveryDecisionSource)
+    decisionSource: RecoveryDecisionSource = RecoveryDecisionSource.AI;
 
     @Property({ nullable: true })
     result?: string;
