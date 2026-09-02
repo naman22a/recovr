@@ -47,11 +47,7 @@ export class AIRecoveryDecisionService {
 
         const decision = JSON.parse(jsonContent);
 
-        return {
-            strategy: decision.strategy,
-            confidence: decision.confidence,
-            reason: decision.reason,
-        };
+        return this.validateDecision(decision);
     }
 
     private buildPrompt(context: RecoveryContext): string {
@@ -88,5 +84,47 @@ Rules:
 - consider the payment failure information and attempt limits
 - explain the reason for your recommendation
 `;
+    }
+
+    private validateDecision(decision: unknown): AIRecoveryDecision {
+        if (typeof decision !== 'object' || decision === null) {
+            throw new Error('AI returned an invalid decision');
+        }
+
+        const value = decision as Record<string, unknown>;
+
+        if (
+            typeof value.strategy !== 'string' ||
+            !Object.values(RecoveryStrategy).includes(
+                value.strategy as RecoveryStrategy,
+            )
+        ) {
+            throw new Error(
+                `AI returned an invalid recovery strategy: ${String(value.strategy)}`,
+            );
+        }
+
+        if (
+            typeof value.confidence !== 'number' ||
+            value.confidence < 0 ||
+            value.confidence > 1
+        ) {
+            throw new Error(
+                `AI returned invalid confidence: ${String(value.confidence)}`,
+            );
+        }
+
+        if (
+            typeof value.reason !== 'string' ||
+            value.reason.trim().length === 0
+        ) {
+            throw new Error('AI returned an invalid reason');
+        }
+
+        return {
+            strategy: value.strategy as RecoveryStrategy,
+            confidence: value.confidence,
+            reason: value.reason,
+        };
     }
 }
