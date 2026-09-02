@@ -135,7 +135,11 @@ export class RecoveryProcessor extends WorkerHost {
 
             await em.flush();
 
-            throw new Error(result.message);
+            console.log(
+                `Recovery attempt ${attempt.id} failed: ${result.message}`,
+            );
+
+            return;
         } catch (error) {
             console.error('Recovery processor failed:', error);
             throw error;

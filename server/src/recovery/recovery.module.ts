@@ -11,6 +11,7 @@ import { RecoveryAnalyticsService } from './recovery-analytics.service';
 import { RecoveryAnalyticsController } from './recovery-analytics.controller';
 import { RecoverySimulatorController } from './recovery-simulator.controller';
 import { RecoverySimulatorService } from './recovery-simulator.service';
+import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { RecoverySimulatorService } from './recovery-simulator.service';
         RecoveryActionService,
         RecoveryAnalyticsService,
         RecoverySimulatorService,
+        AIRecoveryDecisionService,
     ],
     exports: [RecoveryService, RecoveryDecisionService],
 })

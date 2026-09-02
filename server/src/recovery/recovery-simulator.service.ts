@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Payment } from '../models/payment.model';
 import { RecoveryDecisionService } from './recovery-decision.service';
 import { RecoveryService } from './recovery.service';
+import { AIRecoveryDecisionService } from './ai/ai-recovery-decision.service';
 
 @Injectable()
 export class RecoverySimulatorService {
@@ -10,6 +11,7 @@ export class RecoverySimulatorService {
         private readonly em: EntityManager,
         private readonly decisionService: RecoveryDecisionService,
         private readonly recoveryService: RecoveryService,
+        private readonly aiDecisionService: AIRecoveryDecisionService,
     ) {}
 
     async simulate(count = 50) {
@@ -38,14 +40,18 @@ export class RecoverySimulatorService {
         await this.em.persistAndFlush(payments);
 
         for (const payment of payments) {
-            const decision = this.decisionService.decide(
-                payment.errorCode ?? 'PAYMENT_FAILED',
-            );
+            const decision = await this.aiDecisionService.decide({
+                paymentId: payment.id,
+                amount: payment.amount,
+                currency: payment.currency,
+                method: payment.method!,
+                errorCode: payment.errorCode,
+                errorDescription: payment.errorDescription,
+                attemptNumber: 1,
+                maxAttempts: 3,
+            });
 
-            console.log(
-                `Simulation decision for ${payment.razorpayPaymentId}:`,
-                decision,
-            );
+            console.log('AI Recovery Decision:', decision);
 
             await this.recoveryService.createAttempt(
                 payment,
