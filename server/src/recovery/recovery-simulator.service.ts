@@ -97,27 +97,24 @@ export class RecoverySimulatorService {
     }
 
     private getErrorCode(index: number): string {
-        if (index % 5 === 0) {
-            return 'GATEWAY_ERROR';
-        }
+        const errors = [
+            'GATEWAY_ERROR',
+            'BAD_REQUEST_ERROR',
+            'PAYMENT_FAILED',
+            'GATEWAY_ERROR',
+            'BAD_REQUEST_ERROR',
+        ];
 
-        if (index % 3 === 0) {
-            return 'BAD_REQUEST_ERROR';
-        }
-
-        return 'PAYMENT_FAILED';
+        return errors[index % errors.length];
     }
 
     private getErrorDescription(errorCode: string): string {
-        switch (errorCode) {
-            case 'GATEWAY_ERROR':
-                return 'Temporary gateway failure';
+        const descriptions: Record<string, string> = {
+            GATEWAY_ERROR: 'Temporary gateway or network error',
+            BAD_REQUEST_ERROR: 'Payment request was rejected',
+            PAYMENT_FAILED: 'Payment failed',
+        };
 
-            case 'BAD_REQUEST_ERROR':
-                return 'Payment request was rejected';
-
-            default:
-                return 'Payment failed';
-        }
+        return descriptions[errorCode] ?? 'Unknown payment failure';
     }
 }
