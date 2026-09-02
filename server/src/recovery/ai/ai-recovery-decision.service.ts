@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ChatOllama } from '@langchain/ollama';
 import { RecoveryStrategy } from '../../common/enums';
 
 export interface RecoveryContext {
@@ -20,28 +21,72 @@ export interface AIRecoveryDecision {
 
 @Injectable()
 export class AIRecoveryDecisionService {
+    private readonly model = new ChatOllama({
+        model: 'gemma4:12b',
+        temperature: 0,
+    });
+
     async decide(context: RecoveryContext): Promise<AIRecoveryDecision> {
-        switch (context.errorCode) {
-            case 'GATEWAY_ERROR':
-                return {
-                    strategy: RecoveryStrategy.RETRY_PAYMENT,
-                    confidence: 0.4,
-                    reason: 'Temporary gateway failure suggests that retrying the payment may recover it.',
-                };
+        const prompt = this.buildPrompt(context);
 
-            case 'BAD_REQUEST_ERROR':
-                return {
-                    strategy: RecoveryStrategy.CUSTOMER_RETRY,
-                    confidence: 0.88,
-                    reason: 'The payment request was rejected, so the customer should retry after correcting the issue.',
-                };
+        let response = await this.model.invoke(prompt);
 
-            default:
-                return {
-                    strategy: RecoveryStrategy.MANUAL_REVIEW,
-                    confidence: 0.4,
-                    reason: 'The payment failure is not recognized as safely recoverable automatically, so manual review is required.',
-                };
+        if (!response.content) {
+            console.log('AI returned an empty response. Retrying...');
+
+            response = await this.model.invoke(prompt);
         }
+
+        console.log('Raw AI response:', response.content);
+
+        const rawContent = response.content.toString();
+
+        const jsonContent = rawContent
+            .replace(/^```json\s*/, '')
+            .replace(/\s*```$/, '');
+
+        const decision = JSON.parse(jsonContent);
+
+        return {
+            strategy: decision.strategy,
+            confidence: decision.confidence,
+            reason: decision.reason,
+        };
+    }
+
+    private buildPrompt(context: RecoveryContext): string {
+        return `
+You are an AI payment recovery decision engine.
+
+Analyze the failed payment and recommend exactly one recovery strategy.
+
+Payment:
+- ID: ${context.paymentId}
+- Amount: ${context.amount} paise
+- Currency: ${context.currency}
+- Method: ${context.method}
+- Error code: ${context.errorCode ?? 'unknown'}
+- Error description: ${context.errorDescription ?? 'unknown'}
+- Current attempt: ${context.attemptNumber}
+- Maximum attempts: ${context.maxAttempts}
+
+Allowed strategies:
+- retry_payment
+- customer_retry
+- manual_review
+
+Return ONLY valid JSON in this exact format:
+{
+  "strategy": "retry_payment | customer_retry | manual_review",
+  "confidence": 0.0,
+  "reason": "short explanation"
+}
+
+Rules:
+- confidence must be between 0 and 1
+- never recommend a strategy outside the allowed strategies
+- consider the payment failure information and attempt limits
+- explain the reason for your recommendation
+`;
     }
 }
