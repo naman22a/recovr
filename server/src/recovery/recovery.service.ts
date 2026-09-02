@@ -13,7 +13,6 @@ import { InjectQueue } from '@nestjs/bullmq';
 @Injectable()
 export class RecoveryService {
     constructor(
-        private readonly em: EntityManager,
         @InjectQueue(RECOVERY_QUEUE) private readonly recoveryQueue: Queue,
     ) {}
 
@@ -21,8 +20,9 @@ export class RecoveryService {
         payment: Payment,
         strategy: RecoveryStrategy,
         reason: string,
+        em: EntityManager,
     ): Promise<RecoveryAttempt> {
-        const previousAttempts = await this.em.find(RecoveryAttempt, {
+        const previousAttempts = await em.find(RecoveryAttempt, {
             payment: payment,
         });
         const attemptNumber = previousAttempts.length + 1;
@@ -35,9 +35,9 @@ export class RecoveryService {
         attempt.status = RecoveryAttemptStatus.PENDING;
         attempt.attemptNumber = attemptNumber;
 
-        this.em.persist(attempt);
+        em.persist(attempt);
 
-        await this.em.flush();
+        await em.flush();
 
         await this.recoveryQueue.add(
             'process-recovery',

@@ -8,6 +8,7 @@ import {
 } from '../models/recovery-attempt.model';
 import { RECOVERY_QUEUE } from './recovery.queue';
 import { RecoveryActionService } from './recovery-action.service';
+import { RecoveryOrchestratorService } from './recovery-orchestrator.service';
 
 interface RecoveryJob {
     recoveryAttemptId: number;
@@ -19,6 +20,7 @@ export class RecoveryProcessor extends WorkerHost {
     constructor(
         private readonly em: EntityManager,
         private readonly recoveryActionService: RecoveryActionService,
+        private readonly recoveryOrchestrator: RecoveryOrchestratorService,
     ) {
         super();
     }
@@ -138,6 +140,8 @@ export class RecoveryProcessor extends WorkerHost {
             console.log(
                 `Recovery attempt ${attempt.id} failed: ${result.message}`,
             );
+
+            await this.recoveryOrchestrator.handleFailure(attempt, em);
 
             return;
         } catch (error) {

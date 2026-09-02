@@ -15,13 +15,15 @@ export class RazorpayWebhookService {
     ) {}
 
     async handle(eventId: string, payload: RazorpayWebhookPayload) {
+        const em = this.em.fork();
+
         // Ignore events that we don't currently handle
         if (payload.event !== 'payment.failed') {
             return;
         }
 
         // Prevent duplicate webhook processing
-        const existingEvent = await this.em.findOne(WebhookEvent, { eventId });
+        const existingEvent = await em.findOne(WebhookEvent, { eventId });
 
         if (existingEvent) {
             console.log(`Webhook ${eventId} already processed`);
@@ -48,10 +50,10 @@ export class RazorpayWebhookService {
         paymentEntity.errorCode = payment.error_code!;
         paymentEntity.errorDescription = payment.error_description!;
 
-        this.em.persist(webhookEvent);
-        this.em.persist(paymentEntity);
+        em.persist(webhookEvent);
+        em.persist(paymentEntity);
 
-        await this.em.flush();
+        await em.flush();
 
         const decision = this.recoveryDecisionService.decide(
             payment.error_code!,
@@ -63,6 +65,7 @@ export class RazorpayWebhookService {
             paymentEntity,
             decision.strategy,
             decision.reason,
+            em,
         );
 
         console.log(`Processed payment.failed: ${payment.id}`);

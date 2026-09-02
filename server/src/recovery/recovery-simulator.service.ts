@@ -15,6 +15,8 @@ export class RecoverySimulatorService {
     async simulate(count = 50) {
         const payments: Payment[] = [];
 
+        const em = this.em.fork();
+
         for (let i = 1; i <= count; i++) {
             const payment = new Payment();
 
@@ -35,7 +37,7 @@ export class RecoverySimulatorService {
             payments.push(payment);
         }
 
-        await this.em.persistAndFlush(payments);
+        await em.persistAndFlush(payments);
 
         for (const payment of payments) {
             const decision = await this.aiDecisionService.decide({
@@ -55,6 +57,7 @@ export class RecoverySimulatorService {
                 payment,
                 decision.strategy,
                 decision.reason,
+                em,
             );
         }
 
