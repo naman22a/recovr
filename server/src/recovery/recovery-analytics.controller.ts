@@ -9,4 +9,9 @@ export class RecoveryAnalyticsController {
     async getMetrics() {
         return this.analyticsService.getMetrics();
     }
+
+    @Get('history')
+    async getHistory() {
+        return this.analyticsService.getHistory();
+    }
 }

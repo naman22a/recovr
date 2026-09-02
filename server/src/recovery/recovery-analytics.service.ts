@@ -46,9 +46,16 @@ export class RecoveryAnalyticsService {
             0,
         );
 
-        const successfulRecoveries = attempts.filter(
-            (attempt) => attempt.status === RecoveryAttemptStatus.COMPLETED,
-        ).length;
+        const successfulRecoveryPaymentIds = new Set(
+            attempts
+                .filter(
+                    (attempt) =>
+                        attempt.status === RecoveryAttemptStatus.COMPLETED,
+                )
+                .map((attempt) => attempt.payment.id),
+        );
+
+        const successfulRecoveries = successfulRecoveryPaymentIds.size;
 
         const waitingForCustomer = attempts.filter(
             (attempt) =>
@@ -87,5 +94,45 @@ export class RecoveryAnalyticsService {
 
             stoppedRecoveries,
         };
+    }
+
+    async getHistory() {
+        const attempts = await this.em.find(
+            RecoveryAttempt,
+            {},
+            {
+                populate: ['payment'],
+                orderBy: {
+                    createdAt: 'DESC',
+                },
+            },
+        );
+
+        return attempts.map((attempt) => ({
+            attemptId: attempt.id,
+            paymentId: attempt.payment.id,
+            razorpayPaymentId: attempt.payment.razorpayPaymentId,
+
+            amount: attempt.payment.amount,
+            currency: attempt.payment.currency,
+            method: attempt.payment.method,
+
+            attemptNumber: attempt.attemptNumber,
+            maxAttempts: attempt.maxAttempts,
+
+            strategy: attempt.strategy,
+            confidence: attempt.confidence,
+            decisionSource: attempt.decisionSource,
+            reason: attempt.reason,
+
+            status: attempt.status,
+            result: attempt.result,
+            failureReason: attempt.failureReason,
+
+            amountRecovered: attempt.amountRecovered ?? 0,
+
+            createdAt: attempt.createdAt,
+            completedAt: attempt.completedAt,
+        }));
     }
 }
