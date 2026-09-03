@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import SectionPlaceholder from './components/layout/SectionPlaceholder';
+import AiDecisionsPage from './features/ai-decisions/AiDecisionsPage';
 import OverviewPage from './features/overview/OverviewPage';
 import PaymentDetailPage from './features/payments/PaymentDetailPage';
 import PaymentsPage from './features/payments/PaymentsPage';
@@ -20,10 +21,7 @@ export default function App() {
                     path="recovery-attempts"
                     element={<RecoveryAttemptsPage />}
                 />
-                <Route
-                    path="ai-decisions"
-                    element={<SectionPlaceholder title="AI Decisions" />}
-                />
+                <Route path="ai-decisions" element={<AiDecisionsPage />} />
                 <Route
                     path="analytics"
                     element={<SectionPlaceholder title="Analytics" />}
