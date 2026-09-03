@@ -37,7 +37,7 @@ export class RecoveryAttempt {
     @Property({ nullable: true })
     reason?: string;
 
-    @Property({ nullable: true })
+    @Property({ nullable: true, type: 'numeric', precision: 3, scale: 2 })
     confidence?: number;
 
     @Enum(() => RecoveryDecisionSource)
