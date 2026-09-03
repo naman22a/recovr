@@ -266,9 +266,51 @@ This can happen when:
 - PostgreSQL
 - BullMQ workers
 
-<!-- ## Architecture -->
+## Architecture
 
-<!-- TODO: add it later -->
+```mermaid
+flowchart TD
+    A[Razorpay Test Mode] -->|Payment Webhook| B[NestJS API]
+
+    B --> C[Webhook Handler]
+    C --> D[(PostgreSQL)]
+
+    D --> E[AI Recovery Decision Service]
+    E --> F[Ollama + Gemma]
+
+    F -->|Strategy + Confidence + Reason| E
+    E --> G{Safety Validation}
+
+    G -->|Unsafe / Low Confidence / Max Attempts| H[Stop Recovery]
+    G -->|Safe Decision| I[Create Recovery Attempt]
+
+    I --> J[(PostgreSQL)]
+    I --> K[(Redis)]
+
+    K --> L[BullMQ Queue]
+    L --> M[Recovery Worker]
+
+    M --> N[Recovery Action]
+
+    N -->|Retry Payment| O{Payment Result}
+    N -->|Customer Retry| P[Waiting for Customer]
+    N -->|Manual Review| Q[Manual Review / Stopped]
+
+    O -->|Success| R[Recovered]
+    O -->|Failure| S{Attempts Remaining?}
+
+    S -->|Yes| E
+    S -->|No| H
+
+    R --> J
+    P --> J
+    Q --> J
+    H --> J
+
+    J --> T[Analytics & Dashboard]
+    J --> U[Recovery History]
+    J --> V[AI Decisions]
+```
 
 ## AI Decision Pipeline
 
