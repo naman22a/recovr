@@ -1,4 +1,4 @@
-# Recovr
+# ♻️ Recovr
 
 > AI-powered payment recovery and revenue protection platform built for the Razorpay AI Revenue Recovery Buildathon 2026.
 
