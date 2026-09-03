@@ -535,6 +535,7 @@ RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 DATABASE_URL="postgresql://<username>:<password>@localhost:5432/<database>?schema=public"
 REDIS_HOST=localhost
 REDIS_PORT=6379
+GEMINI_API_KEY=
 ```
 
 ### Start PostgreSQL and Redis

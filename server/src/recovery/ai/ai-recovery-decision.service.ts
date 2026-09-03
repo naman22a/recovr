@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ChatOllama } from '@langchain/ollama';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { RecoveryStrategy } from '../../common/enums';
 
 export interface RecoveryContext {
@@ -22,12 +22,19 @@ export interface AIRecoveryDecision {
 
 @Injectable()
 export class AIRecoveryDecisionService {
-    private readonly model = new ChatOllama({
-        model: 'gemma4:12b',
-        temperature: 0,
-        numPredict: 256,
-        think: false,
+    private readonly model = new ChatGoogleGenerativeAI({
+        model: 'gemini-3.8-flash',
+        maxOutputTokens: 256,
+        thinkingConfig: {
+            thinkingLevel: 'LOW',
+        },
     });
+    // private readonly model = new ChatOllama({
+    //     model: 'gemma4:12b',
+    //     temperature: 0,
+    //     numPredict: 256,
+    //     think: false,
+    // });
 
     async decide(context: RecoveryContext): Promise<AIRecoveryDecision> {
         const prompt = this.buildPrompt(context);
