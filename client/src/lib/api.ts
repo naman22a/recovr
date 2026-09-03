@@ -21,3 +21,30 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
 
     return (await response.json()) as T;
 }
+
+export async function apiPost<T>(
+    path: string,
+    body: unknown,
+    signal?: AbortSignal,
+): Promise<T> {
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${path}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify(body),
+            signal,
+        });
+    } catch {
+        throw new Error('Unable to reach the Recovr API.');
+    }
+
+    if (!response.ok) {
+        throw new Error(`Recovr API request failed (${response.status}).`);
+    }
+
+    return (await response.json()) as T;
+}

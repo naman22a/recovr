@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchRecoveryMetrics } from './overview.api';
 import type { RecoveryMetrics } from './overview.mock';
 
@@ -7,11 +7,15 @@ export type RecoveryMetricsState =
     | { status: 'error'; message: string }
     | { status: 'success'; data: RecoveryMetrics };
 
-/** Fetches GET /recovery/metrics once on mount. No caching, no deps. */
-export function useRecoveryMetrics(): RecoveryMetricsState {
+/**
+ * Fetches GET /recovery/metrics on mount. Returns the state plus a `refetch`
+ * that re-runs the request in place (keeping the current data visible).
+ */
+export function useRecoveryMetrics(): [RecoveryMetricsState, () => void] {
     const [state, setState] = useState<RecoveryMetricsState>({
         status: 'loading',
     });
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -30,7 +34,9 @@ export function useRecoveryMetrics(): RecoveryMetricsState {
             });
 
         return () => controller.abort();
-    }, []);
+    }, [reloadKey]);
 
-    return state;
+    const refetch = useCallback(() => setReloadKey((key) => key + 1), []);
+
+    return [state, refetch];
 }

@@ -1,8 +1,10 @@
 import { formatCount, formatInrFromPaise, formatPercent } from '../../lib/format';
 import type { RecoveryMetrics } from './overview.mock';
+import { useRecoveryHistory } from './useRecoveryHistory';
 import { useRecoveryMetrics } from './useRecoveryMetrics';
 import AiRecoveryIntelligence from './AiRecoveryIntelligence';
 import RecentAttemptsTable from './RecentAttemptsTable';
+import SimulateRecovery from './SimulateRecovery';
 
 type OutcomeKey = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -139,18 +141,27 @@ function MetricsPlaceholder({ children }: { children: string }) {
 }
 
 export default function OverviewPage() {
-    const metrics = useRecoveryMetrics();
+    const [metrics, refetchMetrics] = useRecoveryMetrics();
+    const [history, refetchHistory] = useRecoveryHistory();
+
+    const refreshAfterSimulation = () => {
+        refetchMetrics();
+        refetchHistory();
+    };
 
     return (
         <div>
-            <div className="page-head">
-                <h1>Recovery Overview</h1>
-                <p>
-                    Recovr watches failed Razorpay payments and runs AI-driven
-                    recovery &mdash; automatic retries, customer prompts, and
-                    manual-review escalation. Below is current exposure and what
-                    has been recovered so far.
-                </p>
+            <div className="page-head page-head--row">
+                <div>
+                    <h1>Recovery Overview</h1>
+                    <p>
+                        Recovr watches failed Razorpay payments and runs
+                        AI-driven recovery &mdash; automatic retries, customer
+                        prompts, and manual-review escalation. Below is current
+                        exposure and what has been recovered so far.
+                    </p>
+                </div>
+                <SimulateRecovery onCompleted={refreshAfterSimulation} />
             </div>
 
             {metrics.status === 'loading' && (
@@ -177,7 +188,7 @@ export default function OverviewPage() {
                         Newest first
                     </span>
                 </div>
-                <RecentAttemptsTable />
+                <RecentAttemptsTable history={history} />
             </section>
         </div>
     );

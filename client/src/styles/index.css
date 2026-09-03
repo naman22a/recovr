@@ -1320,3 +1320,182 @@ button {
         margin-top: var(--space-2);
     }
 }
+
+/* ================================================================
+   Simulate Recovery — header action, modal, toast
+   ================================================================ */
+.page-head--row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+.page-head--row > div {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.modal-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: var(--space-5);
+    background: rgba(0, 0, 0, 0.55);
+}
+.modal {
+    width: 100%;
+    max-width: 380px;
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+.modal:focus {
+    outline: none;
+}
+.modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.modal-head h2 {
+    font-size: var(--text-md);
+}
+.modal-desc {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+.sim-fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.sim-fieldset legend {
+    margin-bottom: var(--space-2);
+    padding: 0;
+}
+.sim-counts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2);
+}
+.sim-count {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease,
+        color 120ms ease;
+}
+.sim-count:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+.sim-count[data-selected="true"] {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.sim-count input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+.sim-count:focus-within {
+    outline: 2px solid var(--accent-ring);
+    outline-offset: 2px;
+}
+.sim-fieldset:disabled .sim-count {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sim-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+.sim-pulse {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+}
+.sim-error {
+    font-size: var(--text-sm);
+    color: var(--danger);
+}
+
+.toast {
+    position: fixed;
+    right: var(--space-5);
+    bottom: var(--space-5);
+    z-index: 60;
+    max-width: 320px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-left: 2px solid var(--success);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-size: var(--text-sm);
+    color: var(--text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .modal-scrim {
+        animation: modal-fade 120ms ease-out;
+    }
+    .modal {
+        animation: modal-rise 140ms ease-out;
+    }
+    .sim-pulse {
+        animation: recovr-pulse 1.4s ease-in-out infinite;
+    }
+    .toast {
+        animation: modal-rise 160ms ease-out;
+    }
+}
+@keyframes modal-fade {
+    from {
+        opacity: 0;
+    }
+}
+@keyframes modal-rise {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@media (max-width: 560px) {
+    .page-head--row {
+        flex-direction: column;
+    }
+}

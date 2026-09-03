@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchRecoveryHistory } from './overview.api';
 import type { RecoveryAttemptRow } from './overview.mock';
 
@@ -7,11 +7,15 @@ export type RecoveryHistoryState =
     | { status: 'error'; message: string }
     | { status: 'success'; data: RecoveryAttemptRow[] };
 
-/** Fetches GET /recovery/history once on mount. No caching, no deps. */
-export function useRecoveryHistory(): RecoveryHistoryState {
+/**
+ * Fetches GET /recovery/history on mount. Returns the state plus a `refetch`
+ * that re-runs the request in place (keeping the current rows visible).
+ */
+export function useRecoveryHistory(): [RecoveryHistoryState, () => void] {
     const [state, setState] = useState<RecoveryHistoryState>({
         status: 'loading',
     });
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -30,7 +34,9 @@ export function useRecoveryHistory(): RecoveryHistoryState {
             });
 
         return () => controller.abort();
-    }, []);
+    }, [reloadKey]);
 
-    return state;
+    const refetch = useCallback(() => setReloadKey((key) => key + 1), []);
+
+    return [state, refetch];
 }

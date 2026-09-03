@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatInrFromPaise, formatMethod } from '../../lib/format';
 import { STATUS_META, STRATEGY_META } from '../../lib/recovery';
 import type { RecoveryAttemptRow } from './overview.mock';
-import { useRecoveryHistory } from './useRecoveryHistory';
+import type { RecoveryHistoryState } from './useRecoveryHistory';
 
 const COLUMN_COUNT = 9;
 
@@ -78,9 +78,12 @@ function AttemptRow({
     );
 }
 
-export default function RecentAttemptsTable() {
+export default function RecentAttemptsTable({
+    history,
+}: {
+    history: RecoveryHistoryState;
+}) {
     const navigate = useNavigate();
-    const history = useRecoveryHistory();
     const openPayment = (paymentId: number) =>
         navigate(`/payments/${paymentId}`);
 
