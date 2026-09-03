@@ -1,8 +1,8 @@
-/* Local mock data — no API calls yet.
+/* Local mock data + shared response types for the Overview feature.
    Shapes mirror the NestJS recovery endpoints:
-   - RecoveryMetrics      -> GET /recovery/metrics
-   - RecoveryAttemptRow   -> GET /recovery/history (row)
-   Swap these for fetched data when the API layer lands. */
+   - RecoveryMetrics      -> GET /recovery/metrics   (fetched live in overview.api.ts)
+   - RecoveryAttemptRow   -> GET /recovery/history   (row; still mocked below)
+   Swap the remaining mocks for fetched data as the API layer grows. */
 
 import type { RecoveryAttemptStatus, RecoveryStrategy } from '../../lib/recovery';
 
@@ -17,18 +17,6 @@ export interface RecoveryMetrics {
     failedRecoveries: number;
     stoppedRecoveries: number;
 }
-
-export const overviewMetrics: RecoveryMetrics = {
-    paymentsAtRisk: 6,
-    totalAmountAtRisk: 2100000,
-    totalRecoveryAttempts: 14,
-    successfulRecoveries: 4,
-    amountRecovered: 1400000,
-    recoveryRate: 40,
-    waitingForCustomer: 4,
-    failedRecoveries: 2,
-    stoppedRecoveries: 2,
-};
 
 export interface RecoveryAttemptRow {
     attemptId: number;
@@ -181,8 +169,7 @@ export interface StrategyShare {
     count: number;
 }
 
-/* Recommended strategy across all AI decisions (sums to
-   overviewMetrics.totalRecoveryAttempts). */
+/* Recommended strategy across all AI decisions (sums to 14 total attempts). */
 export const strategyDistribution: StrategyShare[] = [
     { strategy: 'retry_payment', label: 'Retry Payment', count: 9 },
     { strategy: 'customer_retry', label: 'Customer Retry', count: 3 },
