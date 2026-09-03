@@ -3,6 +3,7 @@ import AppShell from './components/layout/AppShell';
 import SectionPlaceholder from './components/layout/SectionPlaceholder';
 import OverviewPage from './features/overview/OverviewPage';
 import PaymentDetailPage from './features/payments/PaymentDetailPage';
+import PaymentsPage from './features/payments/PaymentsPage';
 import RecoveryAttemptsPage from './features/recovery-attempts/RecoveryAttemptsPage';
 
 export default function App() {
@@ -14,10 +15,7 @@ export default function App() {
                     path="payments/:paymentId"
                     element={<PaymentDetailPage />}
                 />
-                <Route
-                    path="payments"
-                    element={<SectionPlaceholder title="Payments" />}
-                />
+                <Route path="payments" element={<PaymentsPage />} />
                 <Route
                     path="recovery-attempts"
                     element={<RecoveryAttemptsPage />}
