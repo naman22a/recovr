@@ -3,6 +3,7 @@ import AppShell from './components/layout/AppShell';
 import SectionPlaceholder from './components/layout/SectionPlaceholder';
 import OverviewPage from './features/overview/OverviewPage';
 import PaymentDetailPage from './features/payments/PaymentDetailPage';
+import RecoveryAttemptsPage from './features/recovery-attempts/RecoveryAttemptsPage';
 
 export default function App() {
     return (
@@ -19,7 +20,7 @@ export default function App() {
                 />
                 <Route
                     path="recovery-attempts"
-                    element={<SectionPlaceholder title="Recovery Attempts" />}
+                    element={<RecoveryAttemptsPage />}
                 />
                 <Route
                     path="ai-decisions"
