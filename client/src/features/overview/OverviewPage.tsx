@@ -1,6 +1,5 @@
 import { formatCount, formatInrFromPaise, formatPercent } from '../../lib/format';
 import type { RecoveryMetrics } from './overview.mock';
-import { recentAttempts } from './overview.mock';
 import { useRecoveryMetrics } from './useRecoveryMetrics';
 import AiRecoveryIntelligence from './AiRecoveryIntelligence';
 import RecentAttemptsTable from './RecentAttemptsTable';
@@ -175,7 +174,7 @@ export default function OverviewPage() {
                         className="text-faint"
                         style={{ fontSize: 'var(--text-xs)' }}
                     >
-                        Last {recentAttempts.length} attempts
+                        Newest first
                     </span>
                 </div>
                 <RecentAttemptsTable />

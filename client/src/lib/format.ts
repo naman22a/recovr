@@ -42,6 +42,7 @@ const METHOD_LABELS: Record<string, string> = {
     paylater: 'Pay Later',
 };
 
-export function formatMethod(method: string): string {
+export function formatMethod(method: string | null | undefined): string {
+    if (!method) return '—';
     return METHOD_LABELS[method] ?? method.toUpperCase();
 }

@@ -888,6 +888,12 @@ button {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.data-table .table-note {
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
+    color: var(--text-muted);
+    white-space: normal;
+}
 
 /* confidence meter */
 .conf {

@@ -8,6 +8,7 @@ export type RecoveryStrategy =
     | 'manual_review';
 
 export type RecoveryAttemptStatus =
+    | 'pending'
     | 'completed'
     | 'waiting_for_customer'
     | 'processing'
@@ -36,6 +37,11 @@ export const STATUS_META: Record<
     RecoveryAttemptStatus,
     { label: string; badgeClass: string; tone: string }
 > = {
+    pending: {
+        label: 'Pending',
+        badgeClass: 'badge--neutral',
+        tone: 'neutral',
+    },
     completed: {
         label: 'Recovered',
         badgeClass: 'badge--success',
