@@ -1,4 +1,6 @@
-import { aiDecisionSummary, strategyDistribution } from './overview.mock';
+import { STRATEGY_META, type RecoveryStrategy } from '../../lib/recovery';
+import type { RecoveryAttemptRow } from './overview.mock';
+import type { RecoveryHistoryState } from './useRecoveryHistory';
 
 const STEPS = [
     {
@@ -23,12 +25,43 @@ const STEPS = [
     },
 ];
 
-const decisionTotal = strategyDistribution.reduce(
-    (sum, item) => sum + item.count,
-    0,
-);
+const STRATEGY_ORDER: RecoveryStrategy[] = [
+    'retry_payment',
+    'customer_retry',
+    'manual_review',
+];
 
-export default function AiRecoveryIntelligence() {
+function buildDistribution(rows: RecoveryAttemptRow[]) {
+    const total = rows.length;
+    return STRATEGY_ORDER.map((strategy) => {
+        const count = rows.filter((row) => row.strategy === strategy).length;
+        return {
+            strategy,
+            label: STRATEGY_META[strategy].label,
+            count,
+            share: total === 0 ? 0 : Math.round((count / total) * 100),
+        };
+    });
+}
+
+function meanConfidence(rows: RecoveryAttemptRow[]): number | null {
+    const values = rows
+        .map((row) => row.confidence)
+        .filter((value): value is number => value != null);
+    if (values.length === 0) return null;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+interface Props {
+    history: RecoveryHistoryState;
+}
+
+export default function AiRecoveryIntelligence({ history }: Props) {
+    const rows = history.status === 'success' ? history.data : [];
+    const total = rows.length;
+    const distribution = buildDistribution(rows);
+    const meanConf = meanConfidence(rows);
+
     return (
         <section className="section">
             <div className="section-head">
@@ -37,7 +70,11 @@ export default function AiRecoveryIntelligence() {
                     className="text-faint"
                     style={{ fontSize: 'var(--text-xs)' }}
                 >
-                    {decisionTotal} decisions analysed
+                    {history.status === 'loading'
+                        ? 'Loading…'
+                        : history.status === 'error'
+                          ? 'History unavailable'
+                          : `${total} decision${total === 1 ? '' : 's'} analysed`}
                 </span>
             </div>
 
@@ -55,11 +92,27 @@ export default function AiRecoveryIntelligence() {
                 <div className="ai-intel-lower">
                     <div className="ai-dist">
                         <span className="eyebrow">Recommended strategy</span>
-                        {strategyDistribution.map((item) => {
-                            const share = Math.round(
-                                (item.count / decisionTotal) * 100,
-                            );
-                            return (
+
+                        {history.status === 'loading' && (
+                            <p className="ai-dist-foot">
+                                Loading recovery history&hellip;
+                            </p>
+                        )}
+
+                        {history.status === 'error' && (
+                            <p className="ai-dist-foot">{history.message}</p>
+                        )}
+
+                        {history.status === 'success' && total === 0 && (
+                            <p className="ai-dist-foot">
+                                No recovery attempts yet. The strategy mix
+                                appears once recovery runs.
+                            </p>
+                        )}
+
+                        {history.status === 'success' &&
+                            total > 0 &&
+                            distribution.map((item) => (
                                 <div className="ai-dist-row" key={item.strategy}>
                                     <span className="ai-dist-label">
                                         {item.label}
@@ -68,21 +121,24 @@ export default function AiRecoveryIntelligence() {
                                         <span
                                             className="ai-dist-fill"
                                             data-strategy={item.strategy}
-                                            style={{ width: `${share}%` }}
+                                            style={{ width: `${item.share}%` }}
                                         />
                                     </span>
                                     <span className="ai-dist-val">
-                                        {item.count} &middot; {share}%
+                                        {item.count} &middot; {item.share}%
                                     </span>
                                 </div>
-                            );
-                        })}
-                        <p className="ai-dist-foot">
-                            Mean confidence{' '}
-                            {Math.round(aiDecisionSummary.meanConfidence * 100)}%
-                            &middot; {aiDecisionSummary.clearedSafetyRules} of{' '}
-                            {aiDecisionSummary.decisions} cleared safety rules
-                        </p>
+                            ))}
+
+                        {history.status === 'success' &&
+                            total > 0 &&
+                            meanConf !== null && (
+                                <p className="ai-dist-foot">
+                                    Mean confidence {Math.round(meanConf * 100)}%
+                                    across {total} decision
+                                    {total === 1 ? '' : 's'}
+                                </p>
+                            )}
                     </div>
 
                     <div className="ai-note">

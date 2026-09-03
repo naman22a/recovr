@@ -176,7 +176,7 @@ export default function OverviewPage() {
                 <OverviewMetrics m={metrics.data} />
             )}
 
-            <AiRecoveryIntelligence />
+            <AiRecoveryIntelligence history={history} />
 
             <section className="section">
                 <div className="section-head">
