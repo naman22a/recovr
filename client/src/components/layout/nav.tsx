@@ -1,5 +1,4 @@
-/* Navigation model for the app shell.
-   Single source for section ids, labels and icons — no routing yet. */
+/* Navigation model for the app shell — one entry per route. */
 
 import type { ReactNode } from 'react';
 import {
@@ -11,36 +10,26 @@ import {
     IconSettings,
 } from './icons';
 
-export type NavId =
-    | 'overview'
-    | 'recovery-attempts'
-    | 'payments'
-    | 'ai-decisions'
-    | 'analytics'
-    | 'settings';
-
 export interface NavItem {
-    id: NavId;
+    to: string;
     label: string;
     icon: ReactNode;
 }
 
 export const PRIMARY_NAV: NavItem[] = [
-    { id: 'overview', label: 'Overview', icon: <IconOverview /> },
+    { to: '/', label: 'Overview', icon: <IconOverview /> },
     {
-        id: 'recovery-attempts',
+        to: '/recovery-attempts',
         label: 'Recovery Attempts',
         icon: <IconRecovery />,
     },
-    { id: 'payments', label: 'Payments', icon: <IconPayments /> },
-    { id: 'ai-decisions', label: 'AI Decisions', icon: <IconDecisions /> },
-    { id: 'analytics', label: 'Analytics', icon: <IconAnalytics /> },
+    { to: '/payments', label: 'Payments', icon: <IconPayments /> },
+    { to: '/ai-decisions', label: 'AI Decisions', icon: <IconDecisions /> },
+    { to: '/analytics', label: 'Analytics', icon: <IconAnalytics /> },
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-    { id: 'settings', label: 'Settings', icon: <IconSettings /> },
+    { to: '/settings', label: 'Settings', icon: <IconSettings /> },
 ];
 
-export const NAV_LABELS: Record<NavId, string> = Object.fromEntries(
-    [...PRIMARY_NAV, ...FOOTER_NAV].map((item) => [item.id, item.label]),
-) as Record<NavId, string>;
+export const NAV_ITEMS: NavItem[] = [...PRIMARY_NAV, ...FOOTER_NAV];

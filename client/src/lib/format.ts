@@ -32,3 +32,16 @@ export function formatPercent(value: number): string {
 export function formatTimestamp(iso: string): string {
     return dateTime.format(new Date(iso));
 }
+
+const METHOD_LABELS: Record<string, string> = {
+    upi: 'UPI',
+    card: 'Card',
+    netbanking: 'Netbanking',
+    wallet: 'Wallet',
+    emi: 'EMI',
+    paylater: 'Pay Later',
+};
+
+export function formatMethod(method: string): string {
+    return METHOD_LABELS[method] ?? method.toUpperCase();
+}

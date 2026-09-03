@@ -4,6 +4,8 @@
    - RecoveryAttemptRow   -> GET /recovery/history (row)
    Swap these for fetched data when the API layer lands. */
 
+import type { RecoveryAttemptStatus, RecoveryStrategy } from '../../lib/recovery';
+
 export interface RecoveryMetrics {
     paymentsAtRisk: number;
     totalAmountAtRisk: number;
@@ -27,18 +29,6 @@ export const overviewMetrics: RecoveryMetrics = {
     failedRecoveries: 2,
     stoppedRecoveries: 2,
 };
-
-export type RecoveryAttemptStatus =
-    | 'completed'
-    | 'waiting_for_customer'
-    | 'processing'
-    | 'failed'
-    | 'stopped';
-
-export type RecoveryStrategy =
-    | 'retry_payment'
-    | 'customer_retry'
-    | 'manual_review';
 
 export interface RecoveryAttemptRow {
     attemptId: number;
@@ -184,3 +174,23 @@ export const recentAttempts: RecoveryAttemptRow[] = [
         errorDescription: 'Insufficient funds',
     },
 ];
+
+export interface StrategyShare {
+    strategy: RecoveryStrategy;
+    label: string;
+    count: number;
+}
+
+/* Recommended strategy across all AI decisions (sums to
+   overviewMetrics.totalRecoveryAttempts). */
+export const strategyDistribution: StrategyShare[] = [
+    { strategy: 'retry_payment', label: 'Retry Payment', count: 9 },
+    { strategy: 'customer_retry', label: 'Customer Retry', count: 3 },
+    { strategy: 'manual_review', label: 'Manual Review', count: 2 },
+];
+
+export const aiDecisionSummary = {
+    decisions: 14,
+    meanConfidence: 0.79,
+    clearedSafetyRules: 12,
+};

@@ -1,21 +1,14 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { NAV_LABELS, type NavId } from './nav';
-import OverviewPage from '../../features/overview/OverviewPage';
 
 export default function AppShell() {
-    const [active, setActive] = useState<NavId>('overview');
     const [navOpen, setNavOpen] = useState(false);
 
     return (
         <div className="app-shell">
-            <Sidebar
-                active={active}
-                onNavigate={setActive}
-                open={navOpen}
-                onClose={() => setNavOpen(false)}
-            />
+            <Sidebar open={navOpen} onClose={() => setNavOpen(false)} />
 
             {navOpen && (
                 <div
@@ -25,23 +18,11 @@ export default function AppShell() {
                 />
             )}
 
-            <Header
-                title={NAV_LABELS[active]}
-                onMenu={() => setNavOpen(true)}
-            />
+            <Header onMenu={() => setNavOpen(true)} />
 
             <main className="app-main">
                 <div className="app-main-inner">
-                    {active === 'overview' ? (
-                        <OverviewPage />
-                    ) : (
-                        <section className="app-placeholder">
-                            <p className="eyebrow">{NAV_LABELS[active]}</p>
-                            <p className="text-muted">
-                                This section has not been built yet.
-                            </p>
-                        </section>
-                    )}
+                    <Outlet />
                 </div>
             </main>
         </div>

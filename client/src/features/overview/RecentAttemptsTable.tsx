@@ -1,51 +1,11 @@
-import { formatInrFromPaise } from '../../lib/format';
-import {
-    recentAttempts,
-    type RecoveryAttemptStatus,
-    type RecoveryStrategy,
-} from './overview.mock';
+import { useNavigate } from 'react-router-dom';
+import { formatInrFromPaise, formatMethod } from '../../lib/format';
+import { STATUS_META, STRATEGY_META } from '../../lib/recovery';
+import { recentAttempts } from './overview.mock';
 
-const STATUS_BADGE: Record<
-    RecoveryAttemptStatus,
-    { cls: string; label: string }
-> = {
-    completed: { cls: 'badge--success', label: 'Recovered' },
-    waiting_for_customer: { cls: 'badge--warning', label: 'Waiting' },
-    processing: { cls: 'badge--info', label: 'Processing' },
-    stopped: { cls: 'badge--neutral', label: 'Manual review' },
-    failed: { cls: 'badge--danger', label: 'Failed' },
-};
+export default function RecentAttemptsTable() {
+    const navigate = useNavigate();
 
-const STRATEGY_BADGE: Record<
-    RecoveryStrategy,
-    { cls: string; label: string }
-> = {
-    retry_payment: {
-        cls: 'badge--strategy strategy--retry',
-        label: 'Auto retry',
-    },
-    customer_retry: {
-        cls: 'badge--strategy strategy--customer',
-        label: 'Customer retry',
-    },
-    manual_review: {
-        cls: 'badge--strategy strategy--manual',
-        label: 'Manual review',
-    },
-};
-
-const METHOD_LABEL: Record<string, string> = {
-    upi: 'UPI',
-    card: 'Card',
-    netbanking: 'Netbanking',
-    wallet: 'Wallet',
-};
-
-interface Props {
-    onSelect: (attemptId: number) => void;
-}
-
-export default function RecentAttemptsTable({ onSelect }: Props) {
     return (
         <div className="table-wrap">
             <table className="data-table">
@@ -64,22 +24,24 @@ export default function RecentAttemptsTable({ onSelect }: Props) {
                 </thead>
                 <tbody>
                     {recentAttempts.map((row) => {
-                        const status = STATUS_BADGE[row.status];
-                        const strategy = STRATEGY_BADGE[row.strategy];
+                        const status = STATUS_META[row.status];
+                        const strategy = STRATEGY_META[row.strategy];
                         const confidence = Math.round(row.confidence * 100);
+                        const open = () =>
+                            navigate(`/payments/${row.paymentId}`);
                         return (
                             <tr
                                 key={row.attemptId}
                                 className="data-row"
                                 tabIndex={0}
-                                onClick={() => onSelect(row.attemptId)}
+                                onClick={open}
                                 onKeyDown={(event) => {
                                     if (
                                         event.key === 'Enter' ||
                                         event.key === ' '
                                     ) {
                                         event.preventDefault();
-                                        onSelect(row.attemptId);
+                                        open();
                                     }
                                 }}
                             >
@@ -92,8 +54,7 @@ export default function RecentAttemptsTable({ onSelect }: Props) {
                                     {formatInrFromPaise(row.amount)}
                                 </td>
                                 <td className="cell-method">
-                                    {METHOD_LABEL[row.method] ??
-                                        row.method.toUpperCase()}
+                                    {formatMethod(row.method)}
                                 </td>
                                 <td className="cell-error">
                                     <span
@@ -103,7 +64,7 @@ export default function RecentAttemptsTable({ onSelect }: Props) {
                                     </span>
                                 </td>
                                 <td>
-                                    <span className={`badge ${strategy.cls}`}>
+                                    <span className={`badge ${strategy.badgeClass}`}>
                                         {strategy.label}
                                     </span>
                                 </td>
@@ -126,7 +87,7 @@ export default function RecentAttemptsTable({ onSelect }: Props) {
                                     {row.attemptNumber}/{row.maxAttempts}
                                 </td>
                                 <td>
-                                    <span className={`badge ${status.cls}`}>
+                                    <span className={`badge ${status.badgeClass}`}>
                                         {status.label}
                                     </span>
                                 </td>

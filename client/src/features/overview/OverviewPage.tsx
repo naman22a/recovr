@@ -1,5 +1,6 @@
 import { formatCount, formatInrFromPaise, formatPercent } from '../../lib/format';
 import { overviewMetrics, recentAttempts } from './overview.mock';
+import AiRecoveryIntelligence from './AiRecoveryIntelligence';
 import RecentAttemptsTable from './RecentAttemptsTable';
 
 const m = overviewMetrics;
@@ -54,13 +55,6 @@ const outcomeTotal = outcomes.reduce((sum, o) => sum + o.value, 0);
 
 function pct(value: number): number {
     return outcomeTotal === 0 ? 0 : Math.round((value / outcomeTotal) * 100);
-}
-
-function handleAttemptSelect(attemptId: number): void {
-    // Attempt detail view isn't built yet; rows are wired so it can drop in.
-    if (import.meta.env.DEV) {
-        console.info('recovery attempt selected:', attemptId);
-    }
 }
 
 export default function OverviewPage() {
@@ -131,6 +125,8 @@ export default function OverviewPage() {
                 </div>
             </section>
 
+            <AiRecoveryIntelligence />
+
             <section className="section">
                 <div className="section-head">
                     <h2>Recent Recovery Attempts</h2>
@@ -141,7 +137,7 @@ export default function OverviewPage() {
                         Last {recentAttempts.length} attempts
                     </span>
                 </div>
-                <RecentAttemptsTable onSelect={handleAttemptSelect} />
+                <RecentAttemptsTable />
             </section>
         </div>
     );
