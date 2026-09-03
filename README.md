@@ -633,16 +633,16 @@ The result is a recovery system that is AI-assisted, explainable, bounded, obser
 
 Potential extensions include:
 
-More sophisticated payment failure classification
-Historical recovery outcome learning
-Customer-specific recovery policies
-Adaptive retry timing
-Additional payment recovery strategies
-Time-series revenue recovery analytics
-Production Razorpay payment execution
-Advanced fraud and risk signals
-Experimentation between recovery strategies
-Recovery policy configuration from the dashboard
+- More sophisticated payment failure classification
+- Historical recovery outcome learning
+- Customer-specific recovery policies
+- Adaptive retry timing
+- Additional payment recovery strategies
+- Time-series revenue recovery analytics
+- Production Razorpay payment execution
+- Advanced fraud and risk signals
+- Experimentation between recovery strategies
+- Recovery policy configuration from the dashboard
 
 ## Buildathon
 
