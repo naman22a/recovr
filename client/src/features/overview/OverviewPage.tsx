@@ -1,20 +1,11 @@
-import {
-    formatCount,
-    formatInrFromPaise,
-    formatPercent,
-    formatTimestamp,
-} from '../../lib/format';
-import {
-    overviewMetrics,
-    recentActivity,
-    type RecoveryActivityStatus,
-    type RecoveryStrategy,
-} from './overview.mock';
+import { formatCount, formatInrFromPaise, formatPercent } from '../../lib/format';
+import { overviewMetrics, recentAttempts } from './overview.mock';
+import RecentAttemptsTable from './RecentAttemptsTable';
 
 const m = overviewMetrics;
 
 /* Recovery rate = successful recoveries / total failed payments.
-   40% of 4 successes implies 10 failed payments (6 still at risk + 4 recovered). */
+   40% with 4 successes implies 10 failed payments (6 at risk + 4 recovered). */
 const totalFailedPayments = m.paymentsAtRisk + m.successfulRecoveries;
 
 const kpis: { label: string; value: string; hint: string }[] = [
@@ -61,25 +52,15 @@ const outcomes: { key: OutcomeKey; label: string; value: number }[] = [
 
 const outcomeTotal = outcomes.reduce((sum, o) => sum + o.value, 0);
 
-const STATUS_META: Record<
-    RecoveryActivityStatus,
-    { cls: string; label: string }
-> = {
-    completed: { cls: 'badge--success', label: 'Recovered' },
-    waiting_for_customer: { cls: 'badge--warning', label: 'Waiting' },
-    failed: { cls: 'badge--danger', label: 'Failed' },
-    stopped: { cls: 'badge--neutral', label: 'Manual Review' },
-    processing: { cls: 'badge--info', label: 'Processing' },
-};
-
-const STRATEGY_LABEL: Record<RecoveryStrategy, string> = {
-    retry_payment: 'Auto retry',
-    customer_retry: 'Customer retry',
-    manual_review: 'Manual review',
-};
-
 function pct(value: number): number {
     return outcomeTotal === 0 ? 0 : Math.round((value / outcomeTotal) * 100);
+}
+
+function handleAttemptSelect(attemptId: number): void {
+    // Attempt detail view isn't built yet; rows are wired so it can drop in.
+    if (import.meta.env.DEV) {
+        console.info('recovery attempt selected:', attemptId);
+    }
 }
 
 export default function OverviewPage() {
@@ -152,44 +133,15 @@ export default function OverviewPage() {
 
             <section className="section">
                 <div className="section-head">
-                    <h2>Recent Recovery Activity</h2>
+                    <h2>Recent Recovery Attempts</h2>
                     <span
                         className="text-faint"
                         style={{ fontSize: 'var(--text-xs)' }}
                     >
-                        Last {recentActivity.length} attempts
+                        Last {recentAttempts.length} attempts
                     </span>
                 </div>
-                <div className="activity">
-                    {recentActivity.map((item) => (
-                        <div className="activity-row" key={item.attemptId}>
-                            <div className="activity-main">
-                                <span className="activity-title">
-                                    {STRATEGY_LABEL[item.strategy]} &middot;
-                                    attempt {item.attemptNumber}/
-                                    {item.maxAttempts}
-                                </span>
-                                <span className="activity-sub">
-                                    {item.razorpayPaymentId} &middot;{' '}
-                                    {item.method.toUpperCase()}
-                                </span>
-                            </div>
-                            <div className="activity-meta">
-                                <span
-                                    className={`badge ${STATUS_META[item.status].cls}`}
-                                >
-                                    {STATUS_META[item.status].label}
-                                </span>
-                                <span className="activity-amount">
-                                    {formatInrFromPaise(item.amount)}
-                                </span>
-                                <span className="activity-time">
-                                    {formatTimestamp(item.createdAt)}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <RecentAttemptsTable onSelect={handleAttemptSelect} />
             </section>
         </div>
     );
