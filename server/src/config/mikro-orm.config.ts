@@ -4,6 +4,7 @@ import { Options } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { __prod__ } from '../common/constants';
+import { SeedManager } from '@mikro-orm/seeder';
 
 const config: Options = {
     type: 'postgresql',
@@ -24,6 +25,13 @@ const config: Options = {
     // logging
     debug: !__prod__,
     highlighter: new SqlHighlighter(),
+
+    // seeding
+    seeder: {
+        path: path.join(__dirname, '../seeders'),
+        pathTs: './src/seeders',
+    },
+    extensions: [SeedManager],
 };
 
 export default config;

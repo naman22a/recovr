@@ -23,7 +23,8 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "mg:create": "npx mikro-orm migration:create",
-        "mg:up": "npx mikro-orm migration:up"
+        "mg:up": "npx mikro-orm migration:up",
+        "seed": "mikro-orm seeder:run --class DemoSeeder"
     },
     "dependencies": {
         "@langchain/core": "^1.2.9",
@@ -51,6 +52,7 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3.2.0",
         "@eslint/js": "^9.18.0",
+        "@mikro-orm/seeder": "^5.9.8",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
