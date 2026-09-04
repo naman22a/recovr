@@ -2,6 +2,8 @@
 
 > AI-powered payment recovery and revenue protection platform built for the Razorpay AI Revenue Recovery Buildathon 2026.
 
+![Recovr](./assets/image.png)
+
 Recovr helps businesses recover revenue from failed payments by combining **AI-powered failure analysis**, **bounded recovery strategies**, **deterministic safety rules**, and **automated background processing**.
 
 Instead of blindly retrying failed payments, Recovr analyzes the payment failure and decides what recovery action is appropriate:
